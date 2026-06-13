@@ -93,12 +93,8 @@
 
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = "";
-// 1. Get the base domain (e.g., https://username.github.io)
-const baseDomain = window.location.origin;
-
-// 2. Get the current sub-folder path (e.g., /vehicle-safety/)
-// This ensures it works perfectly whether testing locally OR hosted on GitHub pages!
-const folderPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+// 1. Get the base domain (e.g., https://username.github.io
+// Hardcoding your exact live URL link
 
 // 3. Combine them to form the absolute path to your view file
 // Replace 'yourusername' with your actual GitHub username!
