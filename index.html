@@ -101,7 +101,8 @@ const baseDomain = window.location.origin;
 const folderPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
 
 // 3. Combine them to form the absolute path to your view file
-const scanUrl = `${baseDomain}${folderPath}view-vehicle.html?id=${vehicleId}`;
+// Replace 'yourusername' with your actual GitHub username!
+const scanUrl = `https://tarikhkhan.github.io/vehicle-safety/view-vehicle.html?id=${vehicleId}`;
 
 // 4. Generate the QR Code
 new QRCode(qrContainer, {
