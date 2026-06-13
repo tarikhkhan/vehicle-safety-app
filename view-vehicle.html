@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Emergency Contact Info</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background-color: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-width: 400px; width: 100%; text-align: center; border-top: 8px solid #dc2626; }
+        .loading { font-size: 16px; color: #64748b; font-weight: 600; }
+        .error-msg { color: #dc2626; font-weight: 600; display: none; }
+        .content { display: none; }
+        .warning-icon { font-size: 48px; margin-bottom: 10px; }
+        h2 { color: #0f172a; margin: 10px 0 5px 0; font-size: 24px; }
+        .plate { display: inline-block; background-color: #f1f5f9; border: 2px solid #cbd5e1; padding: 4px 12px; border-radius: 6px; font-weight: 700; color: #334155; margin-bottom: 25px; letter-spacing: 1px; text-transform: uppercase; }
+        .btn-container { display: flex; flex-direction: column; gap: 12px; }
+        .btn { display: flex; align-items: center; justify-content: center; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; transition: transform 0.1s, background-color 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background-color: #2563eb; color: white; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #dc2626; color: white; }
+        .btn-danger:hover { background-color: #b91c1c; }
+        .info-text { font-size: 13px; color: #64748b; margin-top: 20px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="loadingState" class="loading">
+        Retrieving vehicle safety details...
+    </div>
+
+    <div id="errorState" class="error-msg">
+        <div class="warning-icon">⚠️</div>
+        <p>Vehicle details not found or link is invalid.</p>
+    </div>
+
+    <div id="dataState" class="content">
+        <div style="font-size: 40px;">🚗</div>
+        <h2 id="displayOwner">Vehicle Owner</h2>
+        <div id="displayPlate" class="plate">---</div>
+        
+        <div class="btn-container">
+            <a href="#" id="callOwner" class="btn btn-primary">📞 Call Driver / Owner</a>
+            <a href="#" id="callEmergency" class="btn btn-danger">🚨 Contact Emergency Family</a>
+        </div>
+
+        <p class="info-text">Please use these contacts responsibly. If this is a medical emergency, call local help services instantly.</p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA1sceC-a_3NgfYS0gnOER9zrNWTdoGrV8",
+        authDomain: "vehicle-safety-qr.firebaseapp.com",
+        projectId: "vehicle-safety-qr",
+        storageBucket: "vehicle-safety-qr.firebasestorage.app",
+        messagingSenderId: "1030644517517",
+        appId: "1:1030644517517:web:0a3de6be715bc9045a30c4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function getVehicleIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+    }
+
+    async function fetchVehicleDetails() {
+        const id = getVehicleIdFromUrl();
+        
+        if (!id) {
+            showError();
+            return;
+        }
+
+        try {
+            const docRef = doc(db, "vehicles", id);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                document.getElementById('displayOwner').innerText = data.name;
+                document.getElementById('displayPlate').innerText = data.vehicle;
+                
+                document.getElementById('callOwner').href = `tel:${data.phone}`;
+                document.getElementById('callEmergency').href = `tel:${data.emergencyPhone}`;
+                
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('dataState').style.display = 'block';
+            } else {
+                showError();
+            }
+        } catch (error) {
+            console.error("Database lookup error:", error);
+            showError();
+        }
+    }
+
+    function showError() {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+    }
+
+    fetchVehicleDetails();
+</script>
+
+</body>
+</html>
