@@ -70,59 +70,54 @@
     function generateUniqueId() {
         return 'v-' + Math.random().toString(36).substr(2, 9);
     }
+document.getElementById('ownerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerText = "Saving to secure database...";
+    submitBtn.disabled = true;
 
-    document.getElementById('ownerForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.innerText = "Saving to secure database...";
-        submitBtn.disabled = true;
+    const ownerData = {
+        name: document.getElementById('ownerName').value,
+        vehicle: document.getElementById('vehicleNum').value,
+        phone: document.getElementById('ownerPhone').value,
+        emergencyPhone: document.getElementById('familyPhone').value,
+        createdAt: new Date().toISOString()
+    };
 
-        const ownerData = {
-            name: document.getElementById('ownerName').value,
-            vehicle: document.getElementById('vehicleNum').value,
-            phone: document.getElementById('ownerPhone').value,
-            emergencyPhone: document.getElementById('familyPhone').value,
-            createdAt: new Date().toISOString()
-        };
+    const vehicleId = generateUniqueId();
 
-        const vehicleId = generateUniqueId();
+    try {
+        await setDoc(doc(db, "vehicles", vehicleId), ownerData);
 
-        try {
-            await setDoc(doc(db, "vehicles", vehicleId), ownerData);
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = "";
 
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-// 1. Get the base domain (e.g., https://username.github.io
-// Hardcoding your exact live URL link
+        // ABSOLUTE DIRECT URL - Change 'yourusername' to your exact GitHub account name!
+        const scanUrl = `https://tarikhkhan.github.io/vehicle-safety/view-vehicle.html?id=${vehicleId}`;
 
-// 3. Combine them to form the absolute path to your view file
-// Replace 'yourusername' with your actual GitHub username!
-const scanUrl = `https://tarikhkhan.github.io/vehicle-safety/view-vehicle.html?id=${vehicleId}`;
+        new QRCode(qrContainer, {
+            text: scanUrl,
+            width: 200,
+            height: 200,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
 
-// 4. Generate the QR Code
-new QRCode(qrContainer, {
-    text: scanUrl,
-    width: 200,
-    height: 200,
-    colorDark : "#0f172a",
-    colorLight : "#ffffff",
-    correctLevel : QRCode.CorrectLevel.H
+        document.getElementById('qr-result').style.display = 'block';
+        submitBtn.innerText = "Save & Generate QR Code";
+        submitBtn.disabled = false;
+
+    } catch (error) {
+        console.error("Error saving data to Firebase: ", error);
+        alert("Something went wrong saving details.");
+        submitBtn.innerText = "Save & Generate QR Code";
+        submitBtn.disabled = false;
+    }
 });
-            // Dynamic tracking string that targets view-vehicle.html cleanly
-// TO THIS (Replace 192.168.1.15 with your actual IPv4 address from Step 1):
+   
 
-            document.getElementById('qr-result').style.display = 'block';
-            submitBtn.innerText = "Save & Generate QR Code";
-            submitBtn.disabled = false;
-
-        } catch (error) {
-            console.error("Error saving data to Firebase: ", error);
-            alert("Something went wrong saving details to the database.");
-            submitBtn.innerText = "Save & Generate QR Code";
-            submitBtn.disabled = false;
-        }
-    });
 </script>
 
 </body>
